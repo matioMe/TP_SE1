@@ -31,9 +31,8 @@ void Temps::modifieTemps(int sec, int min, int heure, int jour, int mois, int an
 {
     if(mois>=0 && mois<12) //evite le depassement de tableau
     {
-        if((jour>=0 && jour<nbJourParMois[mois] && heure>=0 &&
-            heure<24 && min>=0 && min<60 && sec>=0 && sec<60)
-          || (isBissextile(an) && mois==1 && jour>=0 && jour<29))
+        if((jour>=0 && jour<nbJourParMois[mois] && heure>=0 && heure<24 && min>=0 && min<60 && sec>=0 && sec<60)
+        || (isBissextile(an) && mois==1 && jour>=0 && jour<29))
         {
             this->sec=sec;
             this->min=min;
@@ -41,6 +40,8 @@ void Temps::modifieTemps(int sec, int min, int heure, int jour, int mois, int an
             this->jour=jour;
             this->mois=mois;
             this->an=an;
+            if(this->isBissextile()) this->anneeBissextile=true;
+            else this->anneeBissextile=false;
         }
         else
         {
@@ -57,18 +58,19 @@ void Temps::modifieTemps(int sec, int min, int heure, int jour, int mois, int an
 
 void Temps::modifieJMA(int jour, int mois, int an) //ERR
 {
+    // (jour==this->nbJourParMois[this->mois] && mois!=1) || (jour==this->nbJourParMois[this->mois] && mois==1 && !isBissextile())
+    // || (jour==this->nbJourParMois[this->mois]+1 && mois==1 && isBissextile())
+
     if(mois>=0 && mois<12) //evite le depassement de tableau plus bas
     {
         if((jour>=0 && jour<nbJourParMois[mois]) || (isBissextile(an) && mois==1 && jour>=0 && jour<29))
         {
-            if(this->isBissextile(an)) //si divisible par 10 et par 4 ou par 4 et par 400
-            {
-                this->anneeBissextile=true;
-                this->jour=jour;
-                this->mois=mois-1;
-                this->an=an;
-            }
+            if(this->isBissextile(an)) this->anneeBissextile=true;
             else this->anneeBissextile=false;
+
+            this->jour=jour;
+            this->mois=mois;
+            this->an=an;
         }
         else
         {
@@ -101,6 +103,8 @@ void Temps::modifieHMS(int heure, int min, int sec) //ERR
 void Temps::ajouteA() //OK
 {
     an++;
+    if(this->isBissextile()) this->anneeBissextile=true;
+    else this->anneeBissextile=false;
 }
 
 void Temps::ajouteMois()
@@ -234,12 +238,10 @@ bool Temps::isBissextile(int an) //OK
     //si non divisible par 10 mais par 4 ou par 4 et par 400
     if((an%100!=0 && an%4==0) || (an%400==0))
     {
-        anneeBissextile=true;
         return true;
     }
     else
     {
-        anneeBissextile=false;
         return false;
     }
 }
